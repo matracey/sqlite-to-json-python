@@ -1,3 +1,8 @@
+"""
+This module provides functionality to convert all tables in an SQLite database
+to JSON files and save them in a 'results' folder in the current directory.
+"""
+
 import argparse
 import json
 import os
@@ -6,6 +11,13 @@ from typing import Any, Dict, List, Tuple
 
 
 def dict_factory(cursor: sqlite3.Cursor, row: Tuple) -> Dict[str, Any]:
+    """
+    Converts a row from an SQLite query result into a dictionary.
+
+    :param cursor: The cursor object used to execute the query.
+    :param row: A row from the query result.
+    :return: A dictionary representing the row.
+    """
     result = {}
     for idx, col in enumerate(cursor.description):
         result[col[0]] = row[idx]
@@ -14,6 +26,13 @@ def dict_factory(cursor: sqlite3.Cursor, row: Tuple) -> Dict[str, Any]:
 
 # connect to the SQlite databases
 def open_connection(db_path: str) -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
+    """
+    Opens a connection to the SQLite database and returns a tuple containing
+    the connection and cursor objects.
+
+    :param db_path: The path to the SQLite database.
+    :return: A tuple containing the connection and cursor objects.
+    """
     connection = sqlite3.connect(db_path)
     connection.row_factory = dict_factory
     cursor = connection.cursor()
@@ -21,6 +40,14 @@ def open_connection(db_path: str) -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
 
 
 def get_all_records_in_table(table_name: str, db_path: str) -> str:
+    """
+    Retrieves all records from a specified table in an SQLite database and
+    returns them as a JSON string.
+
+    :param table_name: The name of the table to retrieve records from.
+    :param db_path: The path to the SQLite database.
+    :return: A JSON string containing all records from the specified table.
+    """
     conn, curs = open_connection(db_path)
     conn.row_factory = dict_factory
     curs.execute(f"SELECT * FROM '{table_name}' ")
@@ -32,6 +59,15 @@ def get_all_records_in_table(table_name: str, db_path: str) -> str:
 
 
 def sqlite_to_json(db_path: str, output_path: str) -> None:
+    """
+    Converts all tables in an SQLite database to JSON files and saves them in a
+    'results' folder in the current directory.
+
+    :param db_path: The path to the SQLite database.
+    :param output_path: The path to the output folder where JSON files will be
+        saved.
+    :return: None
+    """
     connection, cursor = open_connection(db_path)
     # select all the tables from the database
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -54,6 +90,14 @@ def sqlite_to_json(db_path: str, output_path: str) -> None:
 
 
 def main():
+    """
+    The main function of the module. It parses command line arguments,
+    validates them, and calls the `sqlite_to_json` function to convert
+    all tables in a SQLite database to JSON files and save them in a
+    'results' folder in the current directory.
+
+    :return: None
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "db_path",
