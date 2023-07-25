@@ -6,11 +6,11 @@
 ```
 	...
 	# modify path to sqlite db
-	pathToSqliteDb = 'path/to/db.sqlite3'
+	PATH_TO_SQLITE_DB = 'path/to/db.sqlite3'
 	...
 ```
 
-- Then run the  import_all.py  file from your terminal or python evironment
+- Then run the import_all.py file from your terminal or python evironment
 
 ```
 	$ python import_all.py
