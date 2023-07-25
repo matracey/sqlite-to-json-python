@@ -1,4 +1,6 @@
+import argparse
 import json
+import os
 import sqlite3
 from typing import Any, Dict, List, Tuple
 
@@ -49,7 +51,27 @@ def sqlite_to_json(db_path: str) -> None:
     connection.close()
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "db_path",
+        help="Path to SQLite database that will be converted to JSON files",
+        type=str,
+    )
+
+    args = parser.parse_args()
+    db_path = os.path.abspath(args.db_path)
+
+    sqlite_exts = [".sqlite", ".sqlite3", ".db", ".db3", ".s3db", ".sl3"]
+
+    db_is_file = os.path.isfile(db_path)
+    db_ext_is_sqlite = db_path.endswith(tuple(sqlite_exts))
+
+    if not db_is_file or not db_ext_is_sqlite:
+        raise ValueError("db_path must be a valid SQLite database")
+
+    sqlite_to_json(db_path)
+
+
 if __name__ == "__main__":
-    # modify path to SQLite DB
-    PATH_TO_SQLITE_DB = "path/to/db.sqlite3"
-    sqlite_to_json(PATH_TO_SQLITE_DB)
+    main()
