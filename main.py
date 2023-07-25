@@ -31,7 +31,7 @@ def get_all_records_in_table(table_name: str, db_path: str) -> str:
     return json.dumps(results)
 
 
-def sqlite_to_json(db_path: str) -> None:
+def sqlite_to_json(db_path: str, output_path: str) -> None:
     connection, cursor = open_connection(db_path)
     # select all the tables from the database
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -44,7 +44,9 @@ def sqlite_to_json(db_path: str) -> None:
         # generate and save JSON files with the table name for each of the
         # database tables and save in results folder
         with open(
-            f"./results/{table_name['name']}.json", "w", encoding="utf-8"
+            os.path.join(output_path, f"{table_name['name']}.json"),
+            "w",
+            encoding="utf-8",
         ) as the_file:
             the_file.write(results)
     # close connection
@@ -58,9 +60,17 @@ def main():
         help="Path to SQLite database that will be converted to JSON files",
         type=str,
     )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="Path to output folder where JSON files will be saved",
+        type=str,
+        default=os.path.join(os.getcwd(), "results"),
+    )
 
     args = parser.parse_args()
     db_path = os.path.abspath(args.db_path)
+    output_path = os.path.abspath(args.output)
 
     sqlite_exts = [".sqlite", ".sqlite3", ".db", ".db3", ".s3db", ".sl3"]
 
@@ -70,7 +80,16 @@ def main():
     if not db_is_file or not db_ext_is_sqlite:
         raise ValueError("db_path must be a valid SQLite database")
 
-    sqlite_to_json(db_path)
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+
+    output_is_dir = os.path.isdir(output_path)
+    output_writeable = os.access(output_path, os.W_OK)
+
+    if not output_is_dir or not output_writeable:
+        raise ValueError("output must be a valid directory that is writable")
+
+    sqlite_to_json(db_path, output_path)
 
 
 if __name__ == "__main__":
